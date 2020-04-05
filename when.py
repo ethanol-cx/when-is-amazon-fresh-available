@@ -15,19 +15,13 @@ def main():
     load_dotenv()
 
     logging.basicConfig(filename=os.getenv(
-        'LOG_FILENAME'), level=logging.DEBUG)
+        'LOG_FILENAME'), level=logging.DEBUG, filemode='w')
 
     session = requests.Session()
 
     # login
-    response = login(session, os.getenv('EMAIL'), os.getenv('PASSWORD'))
-    if response['Status'] == 302:
-        time.sleep(300)
-    elif response['Status'] == 200:
-        logging.debug('Login Successful!')
-    else:
-        logging.error('Failed to login: {}'.format(response))
-        return -1
+    response = login(logging, session, os.getenv(
+        'EMAIL'), os.getenv('PASSWORD'))
 
     while True:
         # check availability

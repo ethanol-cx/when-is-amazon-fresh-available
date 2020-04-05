@@ -1,5 +1,5 @@
 def checkAvailability(session):
-    return
+    return False
 
 
 def checkout(session):
