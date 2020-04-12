@@ -15,20 +15,29 @@ from src.action import checkAvailability, checkout
 load_dotenv()
 
 logging.basicConfig(filename=os.getenv(
-    'LOG_FILENAME'), level=logging.DEBUG, filemode='w')
+    'LOG_FILENAME'), level=os.getenv('logLevel'), filemode='w')
 
 session = requests.Session()
 
 # login
-login(logging, session, os.getenv('EMAIL'), os.getenv('PASSWORD'))
+login(session, os.getenv('EMAIL'), os.getenv('PASSWORD'))
 
+i = 0
+MAX_NUM_OF_ITERATIONS = 10000
 while True:
     # check availability
-    isAvailable = checkAvailability(session)
-    if isAvailable > 0:
+    availableSpotsNum = checkAvailability(session)
+    if availableSpotsNum > 0:
         # checkout
         checkout(session)
         exit()
-
+    i += 1
+    if i % 50 == 0:
+        logging.debug(
+            'Checking for the {}th time'.format(i))
+    if i == MAX_NUM_OF_ITERATIONS:
+        logging.debug(
+            'Maximum trial: {} achieved. Exiting...'.format(MAX_NUM_OF_ITERATIONS))
     # sleep this thread while allowing others
+    logging.debug('Could not find available spots. Sleeping...')
     time.sleep(random.randint(3, 6))

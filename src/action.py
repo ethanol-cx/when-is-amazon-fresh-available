@@ -1,7 +1,11 @@
 from bs4 import BeautifulSoup
+import logging
 import os
 import requests
 import sys
+
+logging.basicConfig(filename=os.getenv(
+    'LOG_FILENAME'), level=os.getenv('LOG_LEVEL'))
 
 
 def checkAvailability(session):
@@ -32,7 +36,9 @@ def checkAvailability(session):
 
     response = session.get(url, headers=headers, params=querystring)
     if response.status_code != 200:
+        logging.error('Failed to check availability: {}'.format(response.text))
         return False
+    logging.debug('Finished checking availability')
     return parseAvailabilityPage(response.text)
 
 
