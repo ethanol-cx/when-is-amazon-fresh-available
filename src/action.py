@@ -3,6 +3,10 @@ import os
 import requests
 import sys
 
+from src.logger import getLogger
+
+logger = getLogger(__name__)
+
 
 def checkAvailability(session):
     # cookieString = session.cookies['cookieString']
@@ -32,13 +36,21 @@ def checkAvailability(session):
 
     response = session.get(url, headers=headers, params=querystring)
     if response.status_code != 200:
-        return False
+        logger.error('Failed to check availability: {}'.format(response.text))
+        exit(-1)
+    logger.debug('Finished checking availability')
     return parseAvailabilityPage(response.text)
 
 
 def parseAvailabilityPage(page):
     # returning the number of available spots - a hidden input named 'groupCount' in the form
-    return int(BeautifulSoup(page).find('input', {'name': 'groupCount'}).get('value'))
+    groupCount = BeautifulSoup(page).find(
+        'input', {'name': 'groupCount'})
+    if groupCount:  # groupCount field only exits when there are no available spots
+        return False
+    # TODO: Change
+    logger.debug(page)  # logging the page for future development
+    return True
 
 
 def checkout(session):
