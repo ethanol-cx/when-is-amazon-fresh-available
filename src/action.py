@@ -42,6 +42,21 @@ def parseAvailabilityPage(page):
 
 
 def checkout(session):
-    # currently just alarming instead of checking out the cart
+    # currently just alarming instead of checking out the system
     alarm()
+    return
+
+
+def alarm():
+    if sys.platform == 'win32':
+        import winsound
+        while True:
+            winsound.PlaySound("SystemQuestion", winsound.SND_ALIAS)
+    else:
+        # has to have previous setup in the os
+        # On Debian / Ubuntu / Linux Mint, run this in your terminal: `sudo apt install sox`
+        # On Mac, run this in your terminal (using macports): `sudo port install sox`
+        duration = 60  # seconds
+        freq = 440  # Hz
+        os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
     return
