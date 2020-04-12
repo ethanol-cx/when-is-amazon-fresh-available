@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import logging
 import os
 import requests
 import sys

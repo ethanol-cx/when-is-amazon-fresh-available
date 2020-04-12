@@ -39,10 +39,10 @@ def login(session, email, password):
     #                    'cookieString': response.headers['set-cookie']}
 
     if response.status_code == 302:
-        logging.warn('Login status code 302')
+        logger.warn('Login status code 302')
         time.sleep(300)
     elif response.status_code == 200:
-        logging.info('Login Successful!')
+        logger.info('Login Successful!')
         return True
-    logging.error('Failed to login: {}'.format(response.text))
+    logger.error('Failed to login: {}'.format(response.text))
     return False
