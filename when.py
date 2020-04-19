@@ -4,39 +4,62 @@ import logging
 import os
 import random
 import requests
+import sys
 import time
-
-from src.login import login
-from src.action import checkAvailability, checkout
-from src.logger import getLogger
 
 # load env variables (including username and password for login)
 load_dotenv()
 
-logger = getLogger(__name__)
+from src.utils import initializeLogger
+initializeLogger()
 
-session = requests.Session()
+from src.login import login
+from src.action import checkAvailability, checkout
 
-# login
-login(session, os.getenv('EMAIL'), os.getenv('PASSWORD'))
+logger = logging.getLogger(__name__)
 
-i = 0
-MAX_NUM_OF_ITERATIONS = 10000
-while True:
-    # check availability
-    isAvailable = checkAvailability(session)
-    if isAvailable:
-        # checkout
-        checkout(session)
-        exit()
-    i += 1
-    if i % 50 == 0:
-        logger.debug(
-            'Checking for the {}th time'.format(i))
-    if i == MAX_NUM_OF_ITERATIONS:
-        logger.warn(
-            'Maximum trial: {} achieved. Exiting...'.format(MAX_NUM_OF_ITERATIONS))
-        exit(1)
-    # sleep this thread while allowing others
-    logger.debug('Could not find available spots. Sleeping...')
-    time.sleep(random.randint(3, 6))
+
+def setBrandEnviron(argv):
+    if len(argv) > 1:
+        if argv[1] == '0':
+            os.environ['WHOLEFOODS_OR_FRESH'] = 'wholefoods'
+            os.environ['BRAND_ID'] = 'VUZHIFdob2xlIEZvb2Rz'
+        elif argv[1] == '1':
+            os.environ['WHOLEFOODS_OR_FRESH'] = 'fresh'
+            os.environ['BRAND_ID'] = 'QW1hem9uIEZyZXNo'
+        return True
+    return False
+
+
+def main(argv):
+    if not setBrandEnviron(argv):
+        print("Please append either '0' (for wholefoods) or '1' (for amazon fresh)")
+    session = requests.Session()
+
+    # login
+    login(session, os.getenv('EMAIL'), os.getenv('PASSWORD'))
+
+    i = 0
+    MAX_NUM_OF_ITERATIONS = 10000
+    while True:
+        # check availability
+        isAvailable = checkAvailability(session)
+        if isAvailable:
+            # checkout
+            checkout(session)
+            exit()
+        i += 1
+        if i % 50 == 0:
+            logger.debug(
+                'Checking for the {}th time'.format(i))
+        if i == MAX_NUM_OF_ITERATIONS:
+            logger.warn(
+                'Maximum trial: {} achieved. Exiting...'.format(MAX_NUM_OF_ITERATIONS))
+            exit(1)
+        # sleep this thread while allowing others
+        logger.debug('Could not find available spots. Sleeping...')
+        time.sleep(random.randint(5, 30))
+
+
+if __name__ == '__main__':
+    main(sys.argv)
