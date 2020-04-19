@@ -129,7 +129,7 @@ def parseAvailabilityPage(session, page):
             logger.debug('Found new availability at Amazon Fresh')
             logger.debug(page)
             return True
-        elif groupCount.attrs['value'] == 0:
+        elif groupCount.attrs['value'] == '0':
             return False
         # TODO: Add condition / Change
         logger.info('Found a new page. Maybe it is the available page.')
