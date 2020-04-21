@@ -8,7 +8,7 @@
 This tool helps to constantly monitor AmazonFresh delivery time-windows and alerts the user when there is a new timeslot.  It uses <a src='https://www.python.org/about/'>Python</a>, and mainly <a src='https://www.crummy.com/software/BeautifulSoup/'> BeautifulSoup</a>.
 
 ### Why it is developed?
-The tool is developed during <a src='https://www.google.com/search?q=covid-19'>COVID-19 pandemic</a>, when the entire globe faces rhw unprecedented threat of the new coronavirus. People are social distancing themselves to help contain the virus. While most should stay at home and avoid contacts with others, the need for grocery shopping services surges and causes a shortage of delivery timewindows in many cities. Hopefully, this tool could make life easier for those who rely on AmazonFresh.
+The tool is developed during <a src='https://www.google.com/search?q=covid-19'>COVID-19 pandemic</a>, when the entire globe faces the unprecedented threat of the new coronavirus. People are social distancing themselves to help contain the virus. While most should stay at home and avoid contacts with others, the need for grocery shopping services surges and causes a shortage of delivery timewindows in many cities. Hopefully, this tool could make life easier for those who rely on AmazonFresh.
 
 ### How to use?
 1. Install <a src='https://www.python.org/downloads/'>python</a> and <a src='https://pip.pypa.io/en/stable/installing/'>pip</a>.
