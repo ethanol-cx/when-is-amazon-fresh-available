@@ -1,31 +1,51 @@
+from bs4 import BeautifulSoup
 import json
+import logging
+import os
 import time
 import requests
 
+from src.utils import alarm
 
-def login(logging, session, email, password):
+logger = logging.getLogger(__name__)
+
+
+def login(session, email, password):
     url = "https://www.amazon.com/ap/signin"
 
-    payload = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"appActionToken\"\r\n\r\ndiXukiwzT19WwnphWI5aZv69ZbEj3D\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"appAction\"\r\n\r\nSIGNIN_PWD_COLLECT\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"metadata1\"\r\n\r\nECdITeCs:8jX1rNNBBqALHalzxYDn7CoirC3RZlt2YmVu8eXoKuaq7AVz93ymYC7NMoT5y3PTr6EiuwJ2qgpqjggiRn7CdeN3sqycfIy2qg9fBbAfrhQrnNpeIHAkJ5/heRtDp8QJ9gPxj/sIxGi+B67IOah2rVk3n0cUXgg4VqihOYshABCxEU5muRu+hhPfo2Vetv8+8dUw1D3Y021J99YQZz2/bRm+FF2O2HLmVe6bTMke2kjnmt0zwdTzGNlUWNNVmJP3h0hH4ltm4/tLL/tW/fYca6QJQSaW2zdy3008scUxd48kdXnjU1TmSiMgDMODIT4buVURecFnJhOegNruO7HZHKH4t/51xbEle0VQhwgLWyNlE0TMYOgn+tyd5KKAIOiOTSvYmVagtU/B+gF+rvewaWPjAD6zDYUnHpRgoysR6wCWhx0/x55xn4h5i6dgOQCUxUxlJCgHLPvrNhJuysTTvFy/SfKNtCeTjNrXk6SB61ICOWB5pNFJyBa7vsrNjKv8rTimUu3ansdcC6rmXvdL0/QPK9WqeSbJRPIfTToNV+UrOZsgb/2e+d4vDAysFLZwa8SrzjAH1I15lvhi+jNqKTJWpZl4uijlElTxuYFO3EBrBVsiIdbfDCI/8I1edIkOdGSOQhSHMsClNYr4Oa6AsZG9WmHfArnTYfMnC/xX+18PiapXWZnuxv/UQQnDN27HECmMSRLv5iNK+Z3FhEkrTunOGO298HeOmkM1pPE9e76wltDZRvC4o3Wo9UoqjfZAke6DF13XSQQk/2bzFCPAqlUYagr/QHfOgAmd9yRWACeNspKKOGA1ROTlpKRWOUI9Paq1L+mypJ61VsTdYv6EN30c8f2T3Z2x+kMG9YOggydm4cFowd4eL+Qh/PNKsPnooOXY/sPo3ljAUYG0SPrWITEma8LL9+THUunbKmYLnsF20+GK+jQnClw/19dZyKXc5hB6hLNF52mlxHLpG6dZ4GISE6Ri311LEza5YClabkIUkjTjSbQio45+C4T5iy58ugDe2nfHGjC53Tzt/2xYmwqhA+gU+GvwXE8xg7dAggAZ3nD+Wm4xUBLzrUp5c4J+VtCa6/ODE8/W8JaePA8/RglmtemvBOW4Oh2AcbrdWjbcCElVm7/BotnXPCNCF16sakyCMGhrdhVkKocLHmEJRMPON4A1OnLbgYheo4bUgCPD5efiyuoz0Bvh0AELXk+HrMY20EgdoOIXqTteMob9saNCHIJJol1oLtcepro/s2pcgT8kA33/IbckPgUnwfh9cZlDXEeo+OxZ0CfcOMKtFOstumlfPo0+2cN3xb+ZelNRlzEkngeX4N5mDvv48SeQ4bQIhvPHOVa66deJJES9af/Ysu2m6/MRIdOnSArqTqDh1LoS+hSfR+K87BuVK4AXJlOAk9WHl3e0hHFNAiSaBJns3lzeJ68UYfGKnDdQCCwtqPpQ3Pp+4OoAJti0rKI6j0U5AAd2fzCGSw/w/fzqkRJyjfQ=\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"workflowState\"\r\n\r\neyJ6aXAiOiJERUYiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiQTI1NktXIn0.av5ZTedKHHcbOF6bDZVvUIIIuwvCbnrJZrRRsH8qE1CrnQx8VmLh1A.SH5avejjkZ-VP7to.85lVl6-odxj3-xuD14Yj7Sa6StgwaEIjZCgG9OxZmy3feLP85f4zjYHAWUMT_rggPC14SZ-h-AHGnXvud8uVRrmb7NL30r2ybEIfVWoD3qWZT_c9bs8DX9Rj9o5kFKMIX2a6lyeR0IoKBrvRz02pxKuHfLAm_9k_IURZXEf5TIEY7aPZpSuQ4-56WXkYu8GQnRkI0J2h2xGIynO_7ulL049hEMr04PNzSXbx7sV8k-N3upnRGZWAi8Wx6TfWo_DThu62lyqBUOjMZov1TbcvX7kzXL63fuKcp8M-lmt0JJFpkP_ieyb8S1HfiQjZxBfbGSzMSVUZ94x8zggYNlzDkVsNZxy9nYcfqaDRLQTST7gdGPlOZqUZkk1GPDX_KuX2kMehVLY_GM6ldhdwzXNOjNiMtaN-H5z30rpYodKOcPwDU3Uk0x56WSquaq8AV_fdv8lCMN0P7S60hOKNQhVxIAkszM15kTXnSH2o7UdvrxrUHyHr7_J6_LtJCxZbkL600dUB2FWsB97fkUkMUHU.6Roc7d0xqSUqc0bB1y7mCw\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"email\"\r\n\r\n{}\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"password\"\r\n\r\n{}\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--".format(email,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  password)
+    payload = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"appActionToken\"\r\n\r\nOLFb6Ke0gSAHkb06Lqj2BLWvdE3JAj3D\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"appAction\"\r\n\r\nSIGNIN_PWD_COLLECT\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"subPageType\"\r\n\r\nSignInClaimCollect\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"openid.return_to\"\r\n\r\nape:aHR0cHM6Ly93d3cuYW1hem9uLmNvbS9ncC95b3Vyc3RvcmUvaG9tZT9pZT1VVEY4JmFjdGlvbj1zaWduLW91dCZwYXRoPSUyRmdwJTJGeW91cnN0b3JlJTJGaG9tZSZyZWZfPW5hdl95b3VyYWNjb3VudF9zaWdub3V0JnNpZ25Jbj0xJnVzZVJlZGlyZWN0T25TdWNjZXNzPTE=\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"prevRID\"\r\n\r\nape:RFA2UzlQSDRSRkg2NjhHNEVNRlg=\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"workflowState\"\r\n\r\neyJ6aXAiOiJERUYiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiQTI1NktXIn0.wm3FJJAuWyynsBjPPJLRiM_r2yavzpocxcZXYtOsJRKx3I0oaTD-lQ.SrUS_DN3aPY5gXJR.nQK_8NECgsv-p-3dY0JaRUZp7LiFrIuNKD_9TmaVz3unHg3-JQx5wvoGt2mHvPprdY5Mi84EfAXJUxEcovCiN8lC5nRHXlxZtAcWaBbT-BY003x-bKE6HmcxF8-wyvpiVkFnC1l7V3O9mOX1y6ZQbfH5TQx0CQQiDpzqfWOEmEYzCyR0CeIdtgkmjb993P9JmHx3eRjHDTK_GTRJ2DnyCuG6tWW19av8R6Kkdoi3DMbf4VfVQcUM-xACuNN_ckDSj73QarP8fTPWiQd8qqzt5BOFqkAi8W_cWMYk15JthIHjkRYtsVfVW28Me5BuHdmDF0yUrOYHGJQOyA.JWs0BJaBIC9Bd-4X-1vnaw\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"email\"\r\n\r\{}\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"password\"\r\n\r\n{}\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"create\"\r\n\r\n0\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--".format(
+        str(email), str(password))
+
     headers = {
         'accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
         'accept-encoding': "gzip, deflate, br",
         'accept-language': "en-US,en;q=0.9",
         'Cache-Control': "no-cache",
         'content-type': "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
+        'cookie': os.getenv('COOKIE'),
         'origin': "https://www.amazon.com",
         'referer': "https://www.amazon.com/ap/signin",
+        'sec-fetch-dest': "document",
+        'sec-fetch-mode': "navigate",
+        'sec-fetch-site': "same-origin",
+        'sec-fetch-user': "?1",
+        'upgrade-insecure-requests': "1",
         'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36",
     }
 
     response = session.post(url, data=payload, headers=headers)
+    logger.debug('Response after LogIn')
+    logger.debug(response.text)
 
-    response = requests.post(url, data=payload, headers=headers)
+    # appending the cookieString from the header
+    # session.cookies = {'cookies': session.cookies,
+    #                    'cookieString': response.headers['set-cookie']}
+
     if response.status_code == 302:
-        time.sleep(300)
-    elif response.status_code == 200:
-        logging.debug('Login Successful!')
+        logger.warn('Login status code 302')
         return True
-    logging.error('Failed to login: {}'.format(response.text))
+    elif response.status_code == 200:
+        logger.info('Login Successful!')
+        return True
+    logger.error('Failed to login: {}'.format(response.text))
     return False
