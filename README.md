@@ -5,7 +5,10 @@
     <img src='https://www.crummy.com/software/BeautifulSoup/bs4/doc/_images/6.1.jpg' height= 150px>
 </div>
 
-This tool helps user constantly monitor AmazonFresh delivery time-windows and alerts user when there is a new slot. It is developed during COVID-19 pandemic, when the entire globe faces unprecedented threat and people are social distancing themselves. It uses <a src='https://www.python.org/about/'>Python</a>, and mainly <a src='https://www.crummy.com/software/BeautifulSoup/'> BeautifulSoup</a>.
+This tool helps to constantly monitor AmazonFresh delivery time-windows and alerts the user when there is a new timeslot.  It uses <a src='https://www.python.org/about/'>Python</a>, and mainly <a src='https://www.crummy.com/software/BeautifulSoup/'> BeautifulSoup</a>.
+
+### Why it is developed?
+The tool is developed during <a src='https://www.google.com/search?q=covid-19'>COVID-19 pandemic</a>, when the entire globe faces rhw unprecedented threat of the new coronavirus. People are social distancing themselves to help contain the virus. While most should stay at home and avoid contacts with others, the need for grocery shopping services surges and causes a shortage of delivery timewindows in many cities. Hopefully, this tool could make life easier for those who rely on AmazonFresh.
 
 ### How to use?
 1. Install <a src='https://www.python.org/downloads/'>python</a> and <a src='https://pip.pypa.io/en/stable/installing/'>pip</a>.
@@ -33,5 +36,4 @@ SESSION_ID={Replace with your SessionID}
 2. Automatically checkout if there is an available timewindow.
 3. Send emails to notify instead of alarming.
 
-This tool is intended only for personal use and developed under a short time, which prioritizes practicality above others. I hope it could help you.
-
+This tool is intended only for personal use and developed under a short time, which prioritizes practicality above others. I hope it could make your life easier during this special time.
