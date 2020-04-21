@@ -7,6 +7,9 @@ from pathlib import Path
 
 
 def initializeLogger():
+    # create the log directory
+    os.makedirs(os.path.abspath(str(os.getenv('LOG_FILENAME'))), exist_ok=True)
+
     # create a file handler
     filehandler = logging.FileHandler(filename='{}.{}'.format(str(os.getenv(
         'LOG_FILENAME')), strftime("%Y-%b-%d-%H%M%S", gmtime())), encoding='utf-8')
@@ -17,17 +20,6 @@ def initializeLogger():
     # set the root logger
     logging.getLogger().setLevel(logging.DEBUG)
     logging.getLogger().addHandler(filehandler)
-
-    # The following code add handler to every modules in the
-    # directory - in case different handlers are needed for different modules
-    # name = ''
-    # processName = ''
-    # logging.getLogger('__main__').addHandler(filehandler)
-    # for f in Path('.').glob('**/*.py'):
-    #     name = str(f).replace('\\', '.')[:-3]  # for Windows
-    #     processName = name.replace('/', '.')  # for Mac/Linux
-    #     print(processName)
-    #     logging.getLogger(processName).addHandler(filehandler)
 
 
 def alarm(itNum=400, type='SystemQuestion'):
